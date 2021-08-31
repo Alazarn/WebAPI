@@ -1,8 +1,12 @@
 ﻿using Contracts;
 using LoggerService;
+using Entities;
+using Repository;
 
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace WebAPI.Extensions
@@ -31,6 +35,19 @@ namespace WebAPI.Extensions
         public static void ConfigureLoggerService(this IServiceCollection services)
         {
             services.AddScoped<ILoggerManager, LoggerManager>();
+        }
+
+        public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDbContext<ProjectDbContext>(opts => {
+                opts.UseSqlServer(configuration["ConnectionStrings:ProductConnection"], 
+                    b => b.MigrationsAssembly("WebAPI"));
+            });
+        }
+
+        public static void ConfigureRepositoryWrapper(this IServiceCollection services) {
+
+            services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
         }
 
     }
