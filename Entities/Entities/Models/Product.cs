@@ -33,6 +33,6 @@ namespace Entities.Models
         [Required(ErrorMessage = "Platform is a required field.")]
         public string Platform { get; set; }
 
-        public List<ProductSystemRequirements> Users { get; set; } = new List<ProductSystemRequirements>();
+        public ProductSystemRequirements SystemRequirements { get; set; }
     }
 }

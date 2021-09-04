@@ -15,7 +15,7 @@ namespace Entities
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfiguration(new ProductConfiguration());
+            //builder.ApplyConfiguration(new ProductConfiguration());
             //builder.ApplyConfiguration(new RequirementsConfiguration());
         }
     }

@@ -2,8 +2,8 @@
 using Contracts;
 using Entities;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System;
 
 namespace Repository
 {
@@ -14,6 +14,14 @@ namespace Repository
         {
         }
 
-        
+        public IEnumerable<Product> GetAllProducts(bool trackChanges)
+        {
+            return FindAll(trackChanges).OrderBy(p => p.Title).ToList();
+        }
+
+        public Product GetProduct(Guid productId, bool trackChanges)
+        {
+            return FindByCondition(p => p.Id.Equals(productId), trackChanges).SingleOrDefault();
+        }
     }
 }

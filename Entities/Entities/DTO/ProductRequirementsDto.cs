@@ -1,58 +1,41 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Entities.Models
+namespace Entities.DTO
 {
-    public class ProductSystemRequirements
+    public class ProductRequirementsDto
     {
-        [Column("RequirementId")]
-        [Key]
         public Guid Id { get; set; }
 
-        [Required]
         public string OsMin { get; set; }
 
-        [Required]
         public string OsMax { get; set; }
 
-        [Required]
         public string ProcessorMin { get; set; }
 
-        [Required]
         public string ProcessorMax { get; set; }
 
-        [Required]
         public string MemoryMin { get; set; }
-
-        [Required]
+        
         public string MemoryMax { get; set; }
 
-        [Required]
         public string StorageMin { get; set; }
-
-        [Required]
+        
         public string StorageMax { get; set; }
-
-        [Required]
+                
         public string DirectXMin { get; set; }
-
-        [Required]
+                
         public string DirectXMax { get; set; }
 
-        [Required]
         public string GraphicsMin { get; set; }
-
-        [Required]
+                
         public string GraphicsMax { get; set; }
 
-        [Required]
         public string LanguagesSupported { get; set; }
 
-        [Required]
         public string PrivacyPolicy { get; set; }
-        
-        public Guid ProductId { get; set; }
-        public Product Product { get; set; }
     }
 }

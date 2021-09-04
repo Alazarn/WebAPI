@@ -12,7 +12,7 @@ namespace Entities.Configuration
             builder.HasData(
                 new ProductSystemRequirements
                 {
-                    Id = Guid.NewGuid(),
+                    Id = new Guid("c9d4c053-49b6-410c-bc78-2d54a9991870"),
                     OsMin = "Windows 98/ME/XP/2000",
                     OsMax = "Windows 98/ME/XP/2000",
                     ProcessorMin = "Pentium II 400MHz Processor",
@@ -27,11 +27,11 @@ namespace Entities.Configuration
                     GraphicsMax = "32MB 3D Accelerated Graphic Card",
                     LanguagesSupported = "English, German, Polish, Russian, Spanish(Sub), Italian(Sub), French(Sub)",
                     PrivacyPolicy = "© 2017 by THQ Nordic GmbH & Piranha Bytes. Piranha Bytes and related logos are registered trademarks or trademarks of Pluto 13 GmbH, Germany in the U.S. and/or other countries. All other brands, product names and logos are trademarks or registered trademarks of their respective owners. All rights reserved.",
-                    ProductId = new Guid("75f8b6eb-c15f-42b9-9144-1de81ad70879")
+                    ProductId = new Guid("E7B032B3-4C53-4266-8811-3052A75D5D6F")
                 },
                 new ProductSystemRequirements
                 {
-                    Id = Guid.NewGuid(),
+                    Id = new Guid("3d490a70-94ce-4d15-9494-5248280c2ce3"),
                     OsMin = "Windows XP/2000/ME/98/Vista",
                     OsMax = "Windows XP/2000/ME/98/Vista",
                     ProcessorMin = "Intel Pentium III 700 MHz",
@@ -46,7 +46,7 @@ namespace Entities.Configuration
                     GraphicsMax = "3D graphics card with 32 MB Ram",
                     LanguagesSupported = "English, German, Polish, Russian, Spanish(Sub), Italian(Sub), French(Sub)",
                     PrivacyPolicy = "© 2017 by THQ Nordic GmbH & Piranha Bytes. Piranha Bytes and related logos are registered trademarks or trademarks of Pluto 13 GmbH, Germany in the U.S. and/or other countries. All other brands, product names and logos are trademarks or registered trademarks of their respective owners. All rights reserved.",
-                    ProductId = new Guid("354c0183-c7be-4979-aa80-74a7f5906bbb")
+                    ProductId = new Guid("FCB36FD8-E0DF-4221-9A51-B6DE63E31BF8")
                 }
                 );
         }

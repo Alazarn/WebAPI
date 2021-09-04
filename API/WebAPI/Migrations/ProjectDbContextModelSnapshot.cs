@@ -60,7 +60,7 @@ namespace WebAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("709aaa94-e4dd-4b71-8e41-90b0e613b989"),
+                            Id = new Guid("e7b032b3-4c53-4266-8811-3052a75d5d6f"),
                             Author = "Piranha Bytes",
                             Description = "War has been waged across the kingdom of Myrtana. Orcish hordes invaded human territory and the king of the land needed a lot of ore to forge enough weapons, should his army stand against this threat. Whoever breaks the law in these darkest of times is sentenced to serve in the giant penal colony of Khorinis, mining the so much needed ore.The whole area, dubbed \"the Colony\", is surrounded by a magical barrier, a sphere two kilometers diameter, sealing off the penal colony from the outside world. The barrier can be passed from the outside in – but once inside, nobody can escape. The barrier was a double-edged sword - soon the prisoners took the opportunity and started a revolt. The Colony became divided into three rivaling factions and the king was forced to negotiate for his ore, not just demand it.You are thrown through the barrier into this prison. With your back against the wall, you have to survive and form volatile alliances until you can finally escape.",
                             Features = "Single Player",
@@ -71,7 +71,7 @@ namespace WebAPI.Migrations
                         },
                         new
                         {
-                            Id = new Guid("c6bd0349-1309-4958-8691-988d1b04eae7"),
+                            Id = new Guid("fcb36fd8-e0df-4221-9a51-b6de63e31bf8"),
                             Author = "Piranha Bytes",
                             Description = "You have torn down the magical barrier and released the prisoners of the Mine Valley. Now the former criminals of the forests and mountains are causing trouble around the capital of Khorinis. The town militia is powerless due to their low amount of force – outside of the town, everyone is helpless against the attacks of the bandits.In the meanwhile, however, Xardas the Magician is preparing you to face a much larger threat: The dragons have been summoned to destroy humanity with their armies. And only the “Eye of Innos”, an ancient divine artifact, can help you stop them...",
                             Features = "Single Player",
@@ -150,16 +150,57 @@ namespace WebAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId")
+                        .IsUnique();
 
                     b.ToTable("Requirements");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("c9d4c053-49b6-410c-bc78-2d54a9991870"),
+                            DirectXMax = "DirectX 7.0",
+                            DirectXMin = "DirectX 7.0",
+                            GraphicsMax = "32MB 3D Accelerated Graphic Card",
+                            GraphicsMin = "16MB 3D Accelerated Graphic Card",
+                            LanguagesSupported = "English, German, Polish, Russian, Spanish(Sub), Italian(Sub), French(Sub)",
+                            MemoryMax = "192MB RAM",
+                            MemoryMin = "128MB RAM",
+                            OsMax = "Windows 98/ME/XP/2000",
+                            OsMin = "Windows 98/ME/XP/2000",
+                            PrivacyPolicy = "© 2017 by THQ Nordic GmbH & Piranha Bytes. Piranha Bytes and related logos are registered trademarks or trademarks of Pluto 13 GmbH, Germany in the U.S. and/or other countries. All other brands, product names and logos are trademarks or registered trademarks of their respective owners. All rights reserved.",
+                            ProcessorMax = "Pentium III 600MHz Processor",
+                            ProcessorMin = "Pentium II 400MHz Processor",
+                            ProductId = new Guid("e7b032b3-4c53-4266-8811-3052a75d5d6f"),
+                            StorageMax = "4 GB",
+                            StorageMin = "4 GB"
+                        },
+                        new
+                        {
+                            Id = new Guid("3d490a70-94ce-4d15-9494-5248280c2ce3"),
+                            DirectXMax = "DirectX 7.0",
+                            DirectXMin = "DirectX 7.0",
+                            GraphicsMax = "3D graphics card with 32 MB Ram",
+                            GraphicsMin = "3D graphics card with 32 MB Ram",
+                            LanguagesSupported = "English, German, Polish, Russian, Spanish(Sub), Italian(Sub), French(Sub)",
+                            MemoryMax = "256 MB Ram or higher",
+                            MemoryMin = "256 MB Ram or higher",
+                            OsMax = "Windows XP/2000/ME/98/Vista",
+                            OsMin = "Windows XP/2000/ME/98/Vista",
+                            PrivacyPolicy = "© 2017 by THQ Nordic GmbH & Piranha Bytes. Piranha Bytes and related logos are registered trademarks or trademarks of Pluto 13 GmbH, Germany in the U.S. and/or other countries. All other brands, product names and logos are trademarks or registered trademarks of their respective owners. All rights reserved.",
+                            ProcessorMax = "Intel Pentium III 700 MHz",
+                            ProcessorMin = "Intel Pentium III 700 MHz",
+                            ProductId = new Guid("fcb36fd8-e0df-4221-9a51-b6de63e31bf8"),
+                            StorageMax = "4 GB",
+                            StorageMin = "4 GB"
+                        });
                 });
 
             modelBuilder.Entity("Entities.Models.ProductSystemRequirements", b =>
                 {
                     b.HasOne("Entities.Models.Product", "Product")
-                        .WithMany("Users")
-                        .HasForeignKey("ProductId")
+                        .WithOne("SystemRequirements")
+                        .HasForeignKey("Entities.Models.ProductSystemRequirements", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -168,7 +209,7 @@ namespace WebAPI.Migrations
 
             modelBuilder.Entity("Entities.Models.Product", b =>
                 {
-                    b.Navigation("Users");
+                    b.Navigation("SystemRequirements");
                 });
 #pragma warning restore 612, 618
         }

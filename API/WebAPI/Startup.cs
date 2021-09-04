@@ -5,10 +5,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
+
 using NLog;
 using System.IO;
+
 using WebAPI.Extensions;
 using Entities;
+using Contracts;
 
 namespace WebAPI
 {
@@ -31,18 +34,24 @@ namespace WebAPI
             services.ConfigureLoggerService();
             services.ConfigureSqlContext(Configuration);
             services.ConfigureRepositoryWrapper();
-
+            
+            services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerManager logger)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseHsts();
+            }
 
+            app.ConfigureExceptionHandler(logger);
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();

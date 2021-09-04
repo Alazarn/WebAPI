@@ -12,7 +12,7 @@ namespace Entities.Configuration
             builder.HasData(
                 new Product
                 {
-                    Id = Guid.NewGuid(),
+                    Id = new Guid("E7B032B3-4C53-4266-8811-3052A75D5D6F"),
                     Title = "Gothic",
                     Author = "Piranha Bytes",
                     Description = "War has been waged across the kingdom of Myrtana. Orcish hordes invaded human territory and the king of the land needed a lot of ore to forge enough weapons, should his army stand against this threat. Whoever breaks the law in these darkest of times is sentenced to serve in the giant penal colony of Khorinis, mining the so much needed ore." +
@@ -25,7 +25,7 @@ namespace Entities.Configuration
                 },
                 new Product
                 {
-                    Id = Guid.NewGuid(),
+                    Id = new Guid("FCB36FD8-E0DF-4221-9A51-B6DE63E31BF8"),
                     Title = "Gothic II",
                     Author = "Piranha Bytes",
                     Description = "You have torn down the magical barrier and released the prisoners of the Mine Valley. Now the former criminals of the forests and mountains are causing trouble around the capital of Khorinis. The town militia is powerless due to their low amount of force – outside of the town, everyone is helpless against the attacks of the bandits." +
