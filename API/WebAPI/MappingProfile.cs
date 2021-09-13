@@ -13,6 +13,10 @@ namespace WebAPI
                 .ForMember(p => p.Features, opt => opt.MapFrom(x => string.Join(", ", x.Genre, x.Features, x.Platform)));
 
             CreateMap<ProductSystemRequirements, ProductRequirementsDto>();
+
+            CreateMap<ProductForCreationDto, Product>();
+
+            CreateMap<RequirementsForCreationDto, ProductSystemRequirements>();
         }
     }
 }

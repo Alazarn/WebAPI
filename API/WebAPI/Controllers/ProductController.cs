@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 
 using Contracts;
 using Entities.DTO;
+using Entities.Models;
 
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using WebAPI.ModelBinders;
 
 namespace WebAPI.Controllers
 {
@@ -36,7 +38,7 @@ namespace WebAPI.Controllers
 
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "ProductById")]
         public IActionResult GetProduct(Guid id)
         {
             var product = repository.Product.GetProduct(id, trackChanges: false);
@@ -54,8 +56,28 @@ namespace WebAPI.Controllers
 
         }
 
+        [HttpPost]
+        public IActionResult CreateProduct([FromBody] ProductForCreationDto ProductForCreationDto)
+        {
+            if (ProductForCreationDto == null)
+            {
+                logger.LogInfo($"ProductForCreationDto object sent from client is null.");
+
+                return BadRequest("ProductForCreationDto object is null");
+            }
+
+            var product = mapper.Map<Product>(ProductForCreationDto);
+
+            repository.Product.CreateProduct(product);
+            repository.Save();
+
+            var productToReturn = mapper.Map<ProductDto>(product);
+
+            return CreatedAtRoute("ProductById", new { id = productToReturn.Id }, productToReturn);
+        }
+
         [HttpGet("{productId}/Requirements")]
-        public IActionResult GetRequirementsbyProduct(Guid productId)
+        public IActionResult GetRequirementsForProduct(Guid productId)
         {
             var product = repository.Product.GetProduct(productId, trackChanges: false);
 
@@ -73,8 +95,8 @@ namespace WebAPI.Controllers
             return Ok(requirementsDto);
         }
 
-        [HttpGet("{productId}/Requirement/{id}")]
-        public IActionResult GetRequirementbyProduct(Guid productId, Guid id)
+        [HttpGet("{productId}/Requirement/{id}", Name = "GetRequirementForProduct")]
+        public IActionResult GetRequirementForProduct(Guid productId, Guid id)
         {
             var product = repository.Product.GetProduct(productId, trackChanges: false);
 
@@ -99,6 +121,89 @@ namespace WebAPI.Controllers
             return Ok(requirementDto);
         }
 
+        [HttpPost("{productId}")]
+        public IActionResult CreateRequirementsForProduct(Guid productId, [FromBody]RequirementsForCreationDto requirementsDto)
+        {
+            if (requirementsDto == null)
+            {
+                logger.LogError("RequirementsForCreationDto object sent from client is null.");
+                return BadRequest("RequirementsForCreationDto object is null");
+            }
+
+            var product = repository.Product.GetProduct(productId, false);
+            if (product == null)
+            {
+                logger.LogInfo($"Product with id: {productId} doesn't exist in the database.");
+                
+                return NotFound();
+            }
+
+            var requirementsEntity = mapper.Map<ProductSystemRequirements>(requirementsDto);
+
+            repository.SystemRequirements.CreateRequirementsForProduct(productId, requirementsEntity);
+            repository.Save();
+
+            var requirementsToReturn = mapper.Map<ProductRequirementsDto>(requirementsEntity);
+
+            return CreatedAtRoute("GetRequirementForProduct", new { productId, id = requirementsToReturn.Id },
+                                  requirementsToReturn);
+        }
+
+        [HttpGet("collection/{ids}", Name = "ProductCollection")]
+        public IActionResult GetProductCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))]IEnumerable<Guid> ids)
+        {
+            if (ids == null)
+            {
+                logger.LogError("Parameter ids is null");
+                return BadRequest("Parameter ids is null");
+            }
+
+            var productEntities = repository.Product.GetByIds(ids, false);
+            if (ids.Count() != productEntities.Count())
+            {
+                logger.LogError("Some ids are not valid in a collection");
+                return NotFound();
+            }
+
+            var productToReturn = mapper.Map<IEnumerable<ProductDto>>(productEntities);
+            return Ok(productToReturn);
+        }
+
+        [HttpPost("collection")]
+        public IActionResult CreateProductCollection([FromBody]IEnumerable<ProductForCreationDto> productCollection)
+        {
+            if (productCollection == null)
+            {
+                logger.LogError("Company collection sent from client is null.");
+                return BadRequest("Company collection is null");
+            }
+
+            var productEntities = mapper.Map<IEnumerable<Product>>(productCollection);
+            foreach (var product in productEntities)
+            {
+                repository.Product.CreateProduct(product);
+            }
+            repository.Save();
+
+            var productCollectionToReturn = mapper.Map<IEnumerable<ProductDto>>(productEntities);
+            var ids = string.Join(",", productCollectionToReturn.Select(c => c.Id));
+
+            return CreatedAtRoute("CompanyCollection", new { ids }, productCollectionToReturn);
+        }
+
+        [HttpDelete("{productId}/requirement/{id}")]
+        public IActionResult DeleteSystemRequirementEntity(Guid productId, Guid id)
+        {
+            var requirementsforProduct = repository.SystemRequirements.GetRequirement(productId, id, false);
+            if (requirementsforProduct == null)
+            {
+                logger.LogInfo($"Employee with id: {id} doesn't exist in the database.");
+                return NotFound();
+            }
+            repository.SystemRequirements.DeleteRequirements(requirementsforProduct);
+            repository.Save();
+            return NoContent();
+        }
 
         //[HttpGet]
         //public IActionResult GetProducts()

@@ -21,5 +21,16 @@ namespace Repository
         {
             return FindByCondition(p => p.ProductId.Equals(productId) && p.Id.Equals(id), trackChanges).SingleOrDefault();
         }
+
+        public void CreateRequirementsForProduct(Guid productId, ProductSystemRequirements requirements)
+        {
+            requirements.ProductId = productId;
+            Create(requirements);
+        }
+
+        public void DeleteRequirements(ProductSystemRequirements systemRequirements)
+        {
+            Delete(systemRequirements);
+        }
     }
 }
