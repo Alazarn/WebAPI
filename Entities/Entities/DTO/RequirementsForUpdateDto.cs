@@ -2,7 +2,7 @@
 
 namespace Entities.DTO
 {
-    public class RequirementsForCreationDto : RequirementsForManipulationDto
+    public class RequirementsForUpdateDto : RequirementsForManipulationDto
     {
         
     }

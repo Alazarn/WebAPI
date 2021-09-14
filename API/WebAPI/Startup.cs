@@ -4,13 +4,12 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 
 using NLog;
 using System.IO;
 
 using WebAPI.Extensions;
-using Entities;
 using Contracts;
 
 namespace WebAPI
@@ -33,15 +32,21 @@ namespace WebAPI
             services.ConfigureLoggerService();
             services.ConfigureSqlContext(Configuration);
             services.ConfigureRepositoryWrapper();
-            
+            services.ConfigureActionFilters();
+
+
             services.AddAutoMapper(typeof(Startup));
-            services.AddControllers();
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;  //switch off 400 bad request for filters
+            });
+            services.AddControllers().AddNewtonsoftJson();            
 
             //services.AddControllers(config =>
             //{
             //    config.RespectBrowserAcceptHeader = true;
             //    config.ReturnHttpNotAcceptable = true;
-            //}).AddXmlDataContractSerializerFormatters().AddCustomCSVFormatter(); 
+            //}).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters().AddCustomCSVFormatter(); 
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerManager logger)

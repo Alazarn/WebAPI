@@ -16,7 +16,11 @@ namespace WebAPI
 
             CreateMap<ProductForCreationDto, Product>();
 
-            CreateMap<RequirementsForCreationDto, ProductSystemRequirements>();
+            CreateMap<RequirementsForCreationDto, ProductSystemRequirements>().ReverseMap();
+
+            CreateMap<RequirementsForUpdateDto, ProductSystemRequirements>().ReverseMap();
+
+            CreateMap<ProductForUpdateDto, Product>();
         }
     }
 }

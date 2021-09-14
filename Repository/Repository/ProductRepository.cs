@@ -4,6 +4,8 @@ using Entities;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Repository
 {
@@ -19,19 +21,25 @@ namespace Repository
             Create(product);
         }
 
-        public IEnumerable<Product> GetAllProducts(bool trackChanges)
+        public async Task<IEnumerable<Product>> GetAllProductsAsync(bool trackChanges)
         {
-            return FindAll(trackChanges).OrderBy(p => p.Title).ToList();
+            return await FindAll(trackChanges).OrderBy(p => p.Title).ToListAsync();
         }
 
-        public IEnumerable<Product> GetByIds(IEnumerable<Guid> ids, bool trackChanges)
+        public async Task<IEnumerable<Product>> GetByIdsAsync(IEnumerable<Guid> ids, bool trackChanges)
         {
-            return FindByCondition(x => ids.Contains(x.Id), trackChanges).ToList();
+            return await FindByCondition(x => ids.Contains(x.Id), trackChanges).ToListAsync();
         }
 
-        public Product GetProduct(Guid productId, bool trackChanges)
+        public async Task<Product> GetProductAsync(Guid productId, bool trackChanges)
         {
-            return FindByCondition(p => p.Id.Equals(productId), trackChanges).SingleOrDefault();
+            return await FindByCondition(p => p.Id.Equals(productId), trackChanges).SingleOrDefaultAsync();
         }
+
+        public void DeleteProduct(Product product)
+        {
+            Delete(product);
+        }
+
     }
 }

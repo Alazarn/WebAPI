@@ -51,9 +51,9 @@ namespace WebAPI
         }
 
         //FormatCsv formats a response the way we want it.
-        private static void FormatCsv(StringBuilder buffer, ProductDto company)
+        private static void FormatCsv(StringBuilder buffer, ProductDto product)
         {
-            buffer.AppendLine($"{company.Id},\"{company.Title},\"{company.Author}\",\"{company.Description}\",\"{company.Price}\",\"{company.Features}\"");
+            buffer.AppendLine($"{product.Id},\"{product.Title},\"{product.Author}\",\"{product.Description}\",\"{product.Price}\",\"{product.Features}\"");
         }
     }
 }

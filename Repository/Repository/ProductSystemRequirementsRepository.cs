@@ -4,6 +4,8 @@ using Entities;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Repository
 {
@@ -12,14 +14,14 @@ namespace Repository
         public ProductSystemRequirementsRepository(ProjectDbContext repositoryContext)
             : base(repositoryContext) { }
 
-        public IEnumerable<ProductSystemRequirements> GetRequirements(Guid productId, bool trackChanges)
+        public async Task<IEnumerable<ProductSystemRequirements>> GetRequirementAsync(Guid productId, bool trackChanges)
         {
-            return FindByCondition(e => e.ProductId.Equals(productId), trackChanges);
+            return await FindByCondition(e => e.ProductId.Equals(productId), trackChanges).ToListAsync();
         }
 
-        public ProductSystemRequirements GetRequirement(Guid productId, Guid id, bool trackChanges) //if there were several requirements
+        public async Task<ProductSystemRequirements> GetRequirementsAsync(Guid productId, Guid id, bool trackChanges) //if there were several requirements
         {
-            return FindByCondition(p => p.ProductId.Equals(productId) && p.Id.Equals(id), trackChanges).SingleOrDefault();
+            return await FindByCondition(p => p.ProductId.Equals(productId) && p.Id.Equals(id), trackChanges).SingleOrDefaultAsync();
         }
 
         public void CreateRequirementsForProduct(Guid productId, ProductSystemRequirements requirements)

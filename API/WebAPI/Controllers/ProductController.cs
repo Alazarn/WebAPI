@@ -1,14 +1,17 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-
-using Contracts;
-using Entities.DTO;
-using Entities.Models;
+using Microsoft.AspNetCore.JsonPatch;
 
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+
+using Contracts;
+using Entities.DTO;
+using Entities.Models;
 using WebAPI.ModelBinders;
+using WebAPI.Filters;
 
 namespace WebAPI.Controllers
 {
@@ -28,9 +31,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetProducts()
+        public async Task<IActionResult> GetProducts()
         {
-            var products = repository.Product.GetAllProducts(trackChanges: false);
+            var products = await repository.Product.GetAllProductsAsync(trackChanges: false);
 
             var productsDto = mapper.Map<IEnumerable<ProductDto>>(products);
 
@@ -39,9 +42,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{id}", Name = "ProductById")]
-        public IActionResult GetProduct(Guid id)
+        public async Task<IActionResult> GetProduct(Guid id)
         {
-            var product = repository.Product.GetProduct(id, trackChanges: false);
+            var product = await repository.Product.GetProductAsync(id, trackChanges: false);
 
             if (product == null)
             {
@@ -57,19 +60,13 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateProduct([FromBody] ProductForCreationDto ProductForCreationDto)
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        public async Task<IActionResult> CreateProduct([FromBody] ProductForCreationDto ProductForCreationDto)
         {
-            if (ProductForCreationDto == null)
-            {
-                logger.LogInfo($"ProductForCreationDto object sent from client is null.");
-
-                return BadRequest("ProductForCreationDto object is null");
-            }
-
             var product = mapper.Map<Product>(ProductForCreationDto);
 
             repository.Product.CreateProduct(product);
-            repository.Save();
+            await repository.SaveAsync();
 
             var productToReturn = mapper.Map<ProductDto>(product);
 
@@ -77,9 +74,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{productId}/Requirements")]
-        public IActionResult GetRequirementsForProduct(Guid productId)
+        public async Task<IActionResult> GetRequirementsForProduct(Guid productId)
         {
-            var product = repository.Product.GetProduct(productId, trackChanges: false);
+            var product = await repository.Product.GetProductAsync(productId, trackChanges: false);
 
             if (product == null)
             {
@@ -88,7 +85,7 @@ namespace WebAPI.Controllers
                 return NotFound();
             }
 
-            var requirementsFromDb = repository.SystemRequirements.GetRequirements(productId, trackChanges: false);
+            var requirementsFromDb = await repository.SystemRequirements.GetRequirementAsync(productId, trackChanges: false);
 
             var requirementsDto = mapper.Map<IEnumerable<ProductRequirementsDto>>(requirementsFromDb);
 
@@ -96,9 +93,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{productId}/Requirement/{id}", Name = "GetRequirementForProduct")]
-        public IActionResult GetRequirementForProduct(Guid productId, Guid id)
+        public async Task<IActionResult> GetRequirementForProductAsync(Guid productId, Guid id)
         {
-            var product = repository.Product.GetProduct(productId, trackChanges: false);
+            var product = await repository.Product.GetProductAsync(productId, trackChanges: false);
 
             if (product == null)
             {
@@ -107,7 +104,7 @@ namespace WebAPI.Controllers
                 return NotFound();
             }
 
-            var requirementFromDb = repository.SystemRequirements.GetRequirement(productId, id, trackChanges: false);
+            var requirementFromDb = await repository.SystemRequirements.GetRequirementsAsync(productId, id, trackChanges: false);
 
             if (requirementFromDb == null)
             {
@@ -122,15 +119,10 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("{productId}")]
-        public IActionResult CreateRequirementsForProduct(Guid productId, [FromBody]RequirementsForCreationDto requirementsDto)
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        public async Task<IActionResult> CreateRequirementsForProduct(Guid productId, [FromBody]RequirementsForCreationDto requirementsDto)
         {
-            if (requirementsDto == null)
-            {
-                logger.LogError("RequirementsForCreationDto object sent from client is null.");
-                return BadRequest("RequirementsForCreationDto object is null");
-            }
-
-            var product = repository.Product.GetProduct(productId, false);
+            var product = await repository.Product.GetProductAsync(productId, false);
             if (product == null)
             {
                 logger.LogInfo($"Product with id: {productId} doesn't exist in the database.");
@@ -141,7 +133,7 @@ namespace WebAPI.Controllers
             var requirementsEntity = mapper.Map<ProductSystemRequirements>(requirementsDto);
 
             repository.SystemRequirements.CreateRequirementsForProduct(productId, requirementsEntity);
-            repository.Save();
+            await repository.SaveAsync();
 
             var requirementsToReturn = mapper.Map<ProductRequirementsDto>(requirementsEntity);
 
@@ -150,7 +142,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("collection/{ids}", Name = "ProductCollection")]
-        public IActionResult GetProductCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))]IEnumerable<Guid> ids)
+        public async Task<IActionResult> GetProductCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))]IEnumerable<Guid> ids)
         {
             if (ids == null)
             {
@@ -158,7 +150,7 @@ namespace WebAPI.Controllers
                 return BadRequest("Parameter ids is null");
             }
 
-            var productEntities = repository.Product.GetByIds(ids, false);
+            var productEntities = await repository.Product.GetByIdsAsync(ids, false);
             if (ids.Count() != productEntities.Count())
             {
                 logger.LogError("Some ids are not valid in a collection");
@@ -170,40 +162,100 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("collection")]
-        public IActionResult CreateProductCollection([FromBody]IEnumerable<ProductForCreationDto> productCollection)
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        public async Task<IActionResult> CreateProductCollection([FromBody]IEnumerable<ProductForCreationDto> productCollection)
         {
-            if (productCollection == null)
-            {
-                logger.LogError("Company collection sent from client is null.");
-                return BadRequest("Company collection is null");
-            }
-
             var productEntities = mapper.Map<IEnumerable<Product>>(productCollection);
             foreach (var product in productEntities)
             {
                 repository.Product.CreateProduct(product);
             }
-            repository.Save();
+            await repository.SaveAsync();
 
             var productCollectionToReturn = mapper.Map<IEnumerable<ProductDto>>(productEntities);
             var ids = string.Join(",", productCollectionToReturn.Select(c => c.Id));
 
-            return CreatedAtRoute("CompanyCollection", new { ids }, productCollectionToReturn);
+            return CreatedAtRoute("ProductCollection", new { ids }, productCollectionToReturn);
         }
 
         [HttpDelete("{productId}/requirement/{id}")]
-        public IActionResult DeleteSystemRequirementEntity(Guid productId, Guid id)
+        public async Task<IActionResult> DeleteSystemRequirementEntity(Guid productId, Guid id)
         {
-            var requirementsforProduct = repository.SystemRequirements.GetRequirement(productId, id, false);
+            var requirementsforProduct = await repository.SystemRequirements.GetRequirementsAsync(productId, id, false);
             if (requirementsforProduct == null)
             {
-                logger.LogInfo($"Employee with id: {id} doesn't exist in the database.");
+                logger.LogInfo($"Requirement with id: {id} doesn't exist in the database.");
                 return NotFound();
             }
             repository.SystemRequirements.DeleteRequirements(requirementsforProduct);
-            repository.Save();
+            await repository.SaveAsync();
             return NoContent();
         }
+
+        [HttpDelete("{productId}")]
+        [ServiceFilter(typeof(ValidateProductExistsAttribute))]
+        public async Task<IActionResult> DeleteProduct(Guid productId)
+        {
+            var product = HttpContext.Items["product"] as Product;
+
+            repository.Product.DeleteProduct(product);
+            await repository.SaveAsync();
+            return NoContent();
+        }
+
+        [HttpPut("{productId}/requirement/{id}")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ServiceFilter(typeof(ValidateRequirementsForProductExistsAttribute))]
+        public async Task<IActionResult> UpdateRequirementsForProduct(Guid productId, Guid id, [FromBody] RequirementsForUpdateDto requirementDto)
+        {
+            var requirementEntity = HttpContext.Items["requirements"] as ProductSystemRequirements;
+
+            mapper.Map(requirementDto, requirementEntity);
+            await repository.SaveAsync();
+            return NoContent();
+        }
+
+        [HttpPut("{id}")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ServiceFilter(typeof(ValidateProductExistsAttribute))]
+        public async Task<ActionResult> UpdateProduct(Guid id, [FromBody] ProductForUpdateDto product)
+        {
+            var productEntity = HttpContext.Items["product"] as Product;
+
+            mapper.Map(product, productEntity);
+            await repository.SaveAsync();
+            return NoContent();
+        }
+
+        [HttpPatch("{productId}/requirement/{id}")]
+        [ServiceFilter(typeof(ValidateRequirementsForProductExistsAttribute))]
+        public async Task<IActionResult> PartiallyUpdateRequirementForProduct(Guid productId, Guid id,
+[FromBody] JsonPatchDocument<RequirementsForUpdateDto> patchDoc)
+        {
+            if (patchDoc == null)
+            {
+                logger.LogError("patchDoc object sent from client is null.");
+                return BadRequest("patchDoc object is null");
+            }
+
+            var requirementsEntity = HttpContext.Items["requirements"] as ProductSystemRequirements;
+
+            var RequirementsToPatch = mapper.Map<RequirementsForUpdateDto>(requirementsEntity);            
+            patchDoc.ApplyTo(RequirementsToPatch, ModelState);
+
+            TryValidateModel(RequirementsToPatch); //helps to ensure that required values will be demanded after first validation if the appropriate validation attribute exists
+
+            if (!ModelState.IsValid)
+            {
+                logger.LogError("Invalid model state for the patch document");
+                return UnprocessableEntity(ModelState);
+            }
+            mapper.Map(RequirementsToPatch, requirementsEntity);
+
+            await repository.SaveAsync();
+            return NoContent();
+        }
+
 
         //[HttpGet]
         //public IActionResult GetProducts()
