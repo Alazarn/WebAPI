@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.JsonPatch;
+using Newtonsoft.Json;
 
 using System;
 using System.Linq;
@@ -12,6 +13,7 @@ using Entities.DTO;
 using Entities.Models;
 using WebAPI.ModelBinders;
 using WebAPI.Filters;
+using Entities.RequestFeatures;
 
 namespace WebAPI.Controllers
 {
@@ -31,9 +33,14 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProducts()
+        public async Task<IActionResult> GetProducts([FromQuery]ProductParameters productParameters)
         {
-            var products = await repository.Product.GetAllProductsAsync(trackChanges: false);
+            if (!productParameters.ValidPriceRange)
+                return BadRequest("Max Price can't be less than min Price.");
+
+            var products = await repository.Product.GetAllProductsAsync(productParameters ,false);
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(products.MetaData));
 
             var productsDto = mapper.Map<IEnumerable<ProductDto>>(products);
 
@@ -92,8 +99,8 @@ namespace WebAPI.Controllers
             return Ok(requirementsDto);
         }
 
-        [HttpGet("{productId}/Requirement/{id}", Name = "GetRequirementForProduct")]
-        public async Task<IActionResult> GetRequirementForProductAsync(Guid productId, Guid id)
+        [HttpGet("{productId}/Requirement/{requirementId}", Name = "GetRequirementForProduct")]
+        public async Task<IActionResult> GetRequirementForProductAsync(Guid productId, Guid requirementId)
         {
             var product = await repository.Product.GetProductAsync(productId, trackChanges: false);
 
@@ -104,11 +111,11 @@ namespace WebAPI.Controllers
                 return NotFound();
             }
 
-            var requirementFromDb = await repository.SystemRequirements.GetRequirementsAsync(productId, id, trackChanges: false);
+            var requirementFromDb = await repository.SystemRequirements.GetRequirementsAsync(productId, requirementId, trackChanges: false);
 
             if (requirementFromDb == null)
             {
-                logger.LogInfo($"A single set of Requirements with id: {id} doesn't exist in the database.");
+                logger.LogInfo($"A single set of Requirements with id: {requirementId} doesn't exist in the database.");
 
                 return NotFound();
             }

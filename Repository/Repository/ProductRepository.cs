@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Entities.RequestFeatures;
+using Repository.Extensions;
 
 namespace Repository
 {
@@ -21,9 +23,16 @@ namespace Repository
             Create(product);
         }
 
-        public async Task<IEnumerable<Product>> GetAllProductsAsync(bool trackChanges)
+        public async Task<PagedList<Product>> GetAllProductsAsync(ProductParameters productParameters, bool trackChanges)
         {
-            return await FindAll(trackChanges).OrderBy(p => p.Title).ToListAsync();
+            var products = await FindAll(trackChanges).FilterProducts(productParameters.MinPrice, productParameters.MaxPrice)
+                .Search(productParameters.SearchQuery)
+                .Sort(productParameters.OrderBy)
+                //.Skip((productParameters.PageNumber - 1) * productParameters.PageSize)
+                //.Take(productParameters.PageSize)
+                .ToListAsync();
+
+            return PagedList<Product>.ToPagedList(products, productParameters.PageNumber, productParameters.PageSize);
         }
 
         public async Task<IEnumerable<Product>> GetByIdsAsync(IEnumerable<Guid> ids, bool trackChanges)
