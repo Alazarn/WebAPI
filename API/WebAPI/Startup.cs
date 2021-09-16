@@ -33,6 +33,7 @@ namespace WebAPI
             services.ConfigureSqlContext(Configuration);
             services.ConfigureRepositoryWrapper();
             services.ConfigureActionFilters();
+            services.ConfigureDataShaping();
 
 
             services.AddAutoMapper(typeof(Startup));
@@ -40,7 +41,7 @@ namespace WebAPI
             {
                 options.SuppressModelStateInvalidFilter = true;  //switch off 400 bad request for filters
             });
-            services.AddControllers().AddNewtonsoftJson();            
+            services.AddControllers().AddNewtonsoftJson();           
 
             //services.AddControllers(config =>
             //{

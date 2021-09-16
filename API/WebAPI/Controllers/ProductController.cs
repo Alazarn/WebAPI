@@ -24,12 +24,14 @@ namespace WebAPI.Controllers
         private readonly IRepositoryWrapper repository;
         private readonly ILoggerManager logger;
         private readonly IMapper mapper;
-
-        public ProductController(IRepositoryWrapper repository, ILoggerManager logger, IMapper mapper)
+        private readonly IDataShaper<ProductDto> dataShaper;
+        public ProductController(IRepositoryWrapper repository, ILoggerManager logger, IMapper mapper,
+            IDataShaper<ProductDto> dataShaper)
         {
             this.repository = repository;
             this.logger = logger;
             this.mapper = mapper;
+            this.dataShaper = dataShaper;
         }
 
         [HttpGet]
@@ -44,7 +46,7 @@ namespace WebAPI.Controllers
 
             var productsDto = mapper.Map<IEnumerable<ProductDto>>(products);
 
-            return Ok(productsDto);
+            return Ok(dataShaper.ShapeData(productsDto, productParameters.Fields));
 
         }
 

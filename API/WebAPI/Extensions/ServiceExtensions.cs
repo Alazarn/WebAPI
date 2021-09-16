@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Entities.DTO;
 
 namespace WebAPI.Extensions
 {
@@ -55,6 +56,11 @@ namespace WebAPI.Extensions
             services.AddScoped<ValidationFilterAttribute>();
             services.AddScoped<ValidateProductExistsAttribute>();
             services.AddScoped<ValidateRequirementsForProductExistsAttribute>();
+        }
+
+        public static void ConfigureDataShaping(this IServiceCollection services)
+        {
+            services.AddScoped<IDataShaper<ProductDto>, DataShaper<ProductDto>>();
         }
 
         //public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder)
