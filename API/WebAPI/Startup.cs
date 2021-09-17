@@ -11,6 +11,7 @@ using System.IO;
 
 using WebAPI.Extensions;
 using Contracts;
+using AspNetCoreRateLimit;
 
 namespace WebAPI
 {
@@ -34,6 +35,15 @@ namespace WebAPI
             services.ConfigureRepositoryWrapper();
             services.ConfigureActionFilters();
             services.ConfigureDataShaping();
+            services.AddCustomMediaTypes();
+            services.ConfigureVersioning();
+            services.AddMemoryCache();
+            services.ConfigureResponseCaching();
+            //services.ConfigureHttpCacheHeaders();
+            services.ConfigureRateLimitingOptions();
+            services.AddHttpContextAccessor();
+            services.AddAuthentication();
+            services.ConfigureIdentity();
 
 
             services.AddAutoMapper(typeof(Startup));
@@ -41,13 +51,13 @@ namespace WebAPI
             {
                 options.SuppressModelStateInvalidFilter = true;  //switch off 400 bad request for filters
             });
-            services.AddControllers().AddNewtonsoftJson();           
+            services.AddControllers(config =>
+            {
+                
+                config.CacheProfiles.Add("120SecondsDuration", new CacheProfile { Duration = 10 });
+            }).AddNewtonsoftJson();        
 
-            //services.AddControllers(config =>
-            //{
-            //    config.RespectBrowserAcceptHeader = true;
-            //    config.ReturnHttpNotAcceptable = true;
-            //}).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters().AddCustomCSVFormatter(); 
+            
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerManager logger)
@@ -73,8 +83,15 @@ namespace WebAPI
                 ForwardedHeaders = ForwardedHeaders.All
             });
 
+            app.UseResponseCaching();
+
+            //app.UseHttpCacheHeaders();
+
+            app.UseIpRateLimiting();
+
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

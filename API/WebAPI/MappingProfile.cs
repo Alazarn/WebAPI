@@ -21,6 +21,9 @@ namespace WebAPI
             CreateMap<RequirementsForUpdateDto, ProductSystemRequirements>().ReverseMap();
 
             CreateMap<ProductForUpdateDto, Product>();
+
+            CreateMap<UserForRegistrationDto, User>();
+
         }
     }
 }

@@ -14,11 +14,16 @@ using Entities.Models;
 using WebAPI.ModelBinders;
 using WebAPI.Filters;
 using Entities.RequestFeatures;
+using Marvin.Cache.Headers;
 
 namespace WebAPI.Controllers
 {
+    [ApiVersion("1.0")]
     [Route("api/Product")]
     [ApiController]
+    [ResponseCache(CacheProfileName ="120SecondsDuration")]
+    //[HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 60)]
+    //[HttpCacheValidation(MustRevalidate = false)]
     public class ProductController : ControllerBase
     {
         private readonly IRepositoryWrapper repository;
@@ -34,7 +39,8 @@ namespace WebAPI.Controllers
             this.dataShaper = dataShaper;
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetProducts")]        
+        [HttpHead]
         public async Task<IActionResult> GetProducts([FromQuery]ProductParameters productParameters)
         {
             if (!productParameters.ValidPriceRange)
@@ -47,8 +53,8 @@ namespace WebAPI.Controllers
             var productsDto = mapper.Map<IEnumerable<ProductDto>>(products);
 
             return Ok(dataShaper.ShapeData(productsDto, productParameters.Fields));
-
         }
+        
 
         [HttpGet("{id}", Name = "ProductById")]
         public async Task<IActionResult> GetProduct(Guid id)
@@ -68,7 +74,7 @@ namespace WebAPI.Controllers
 
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateProduct")]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateProduct([FromBody] ProductForCreationDto ProductForCreationDto)
         {
@@ -263,46 +269,6 @@ namespace WebAPI.Controllers
 
             await repository.SaveAsync();
             return NoContent();
-        }
-
-
-        //[HttpGet]
-        //public IActionResult GetProducts()
-        //{
-        //    try
-        //    {
-        //        var products = repository.Product.GetAllProducts(trackChanges: false);
-
-        //        var productsDto = mapper.Map<IEnumerable<ProductDto>>(products);
-
-        //        //var productsDto = products.Select(c => new ProductDto
-        //        //{
-        //        //    Id = c.Id,
-        //        //    Title = c.Title,
-        //        //    Author = c.Author,
-        //        //    Description = c.Description,
-        //        //    Price = c.Price,
-        //        //    Features = string.Join(", ", c.Genre, c.Features, c.Platform)
-        //        //});
-
-        //        return Ok(productsDto);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        logger.LogError($"Error in the {nameof(GetProducts)} action {ex}");
-
-        //        return StatusCode(500, "Internal Server Error");
-        //    }
-        //}
-
-        //    [HttpGet]
-        //public IEnumerable<string> GetLog()
-        //{
-        //    logger.LogInfo("Here is info message from our values controller.");
-        //    logger.LogDebug("Here is debug message from our values controller.");
-        //    logger.LogWarn("Here is warn message from our values controller.");
-        //    logger.LogError("Here is an error message from our values controller.");
-        //    return new string[] { "value1", "value2" };
-        //}     
+        }             
     }
 }
