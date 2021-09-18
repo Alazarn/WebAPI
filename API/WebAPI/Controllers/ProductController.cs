@@ -15,6 +15,7 @@ using WebAPI.ModelBinders;
 using WebAPI.Filters;
 using Entities.RequestFeatures;
 using Marvin.Cache.Headers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
 {
@@ -22,8 +23,8 @@ namespace WebAPI.Controllers
     [Route("api/Product")]
     [ApiController]
     [ResponseCache(CacheProfileName ="120SecondsDuration")]
-    //[HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 60)]
-    //[HttpCacheValidation(MustRevalidate = false)]
+    [Authorize]
+    [ApiExplorerSettings(GroupName = "v1")]
     public class ProductController : ControllerBase
     {
         private readonly IRepositoryWrapper repository;
@@ -39,7 +40,7 @@ namespace WebAPI.Controllers
             this.dataShaper = dataShaper;
         }
 
-        [HttpGet(Name = "GetProducts")]        
+        [HttpGet(Name = "GetProducts"), Authorize(Roles = "User")]        
         [HttpHead]
         public async Task<IActionResult> GetProducts([FromQuery]ProductParameters productParameters)
         {

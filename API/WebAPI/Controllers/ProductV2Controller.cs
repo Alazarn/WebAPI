@@ -15,6 +15,7 @@ namespace WebAPI.Controllers
     [ApiVersion("2.0")]
     [Route("api/Product")]
     [ApiController]
+    [ApiExplorerSettings(GroupName = "v2")]
     public class ProductV2Controller : ControllerBase
     {
         private readonly IRepositoryWrapper repository;

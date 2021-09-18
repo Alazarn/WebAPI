@@ -39,11 +39,13 @@ namespace WebAPI
             services.ConfigureVersioning();
             services.AddMemoryCache();
             services.ConfigureResponseCaching();
-            //services.ConfigureHttpCacheHeaders();
             services.ConfigureRateLimitingOptions();
             services.AddHttpContextAccessor();
             services.AddAuthentication();
             services.ConfigureIdentity();
+            services.ConfigureJWT(Configuration);
+            services.ConfigureAuth();
+            services.ConfigureSwagger();
 
 
             services.AddAutoMapper(typeof(Startup));
@@ -85,14 +87,19 @@ namespace WebAPI
 
             app.UseResponseCaching();
 
-            //app.UseHttpCacheHeaders();
-
             app.UseIpRateLimiting();
 
             app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseSwagger();
+
+            app.UseSwaggerUI(s =>
+            {
+                s.SwaggerEndpoint("/swagger/v1/swagger.json", "WebAPI v1");
+                s.SwaggerEndpoint("/swagger/v2/swagger.json", "WebAPI v2");
+            });
 
             app.UseEndpoints(endpoints =>
             {
